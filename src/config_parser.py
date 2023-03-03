@@ -230,6 +230,23 @@ def get_drive_remove_obsolete(config):
     return drive_remove_obsolete
 
 
+def get_photos_remove_obsolete(config):
+    """Return photos remove obsolete from config."""
+    photos_remove_obsolete = False
+    config_path = ["photos", "remove_obsolete"]
+    if not traverse_config_path(config=config, config_path=config_path):
+        LOGGER.warning(
+            f"Warning: remove_obsolete is not found in {config_path_to_string(config_path)}."
+            + " Not removing the obsolete files and folders."
+        )
+    else:
+        photos_remove_obsolete = get_config_value(config=config, config_path=config_path)
+        LOGGER.debug(
+            f"{'R' if photos_remove_obsolete else 'Not R'}emoving obsolete photos ..."
+        )
+    return photos_remove_obsolete
+
+
 def prepare_photos_destination(config):
     """Prepare photos destination path."""
     LOGGER.debug("Checking photos destination ...")
