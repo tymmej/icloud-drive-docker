@@ -32,11 +32,23 @@ def generate_file_name(photo, file_size, destination_path):
         destination_path,
         f'{"__".join([name, file_size, base64.urlsafe_b64encode(photo.id.encode()).decode()])}.{extension}',
     )
+    album_name = destination_path.split('/')[-1]
+    file_size_id_path = os.path.join(
+        destination_path,
+        f'{"__".join([name, album_name, base64.urlsafe_b64encode(photo.id.encode()).decode()[:8]])}.{extension}',
+    )
+    file_size_id_2_path = os.path.join(
+        destination_path,
+        f'{"_".join([album_name, name, file_size, base64.urlsafe_b64encode(photo.id.encode()).decode()[2:10]])}.{extension}',
+    )
     if os.path.isfile(file_path):
         os.rename(file_path, file_size_id_path)
     if os.path.isfile(file_size_path):
         os.rename(file_size_path, file_size_id_path)
-    return file_size_id_path
+    if os.path.isfile(file_size_id_path):
+        LOGGER.info(f"Renaming {file_size_id_path} to {file_size_id_2_path}")
+        os.rename(file_size_id_path, file_size_id_2_path)
+    return file_size_id_2_path
 
 
 def photo_exists(photo, file_size, local_path):
@@ -112,8 +124,8 @@ def sync_photos(config, photos):
     """Sync all photos."""
     destination_path = config_parser.prepare_photos_destination(config=config)
     filters = config_parser.get_photos_filters(config=config)
-    if filters["albums"]:
-        for album in iter(filters["albums"]):
+    if not filters["albums"]:
+        for album in photos.albums.keys():
             sync_album(
                 album=photos.albums[album],
                 destination_path=os.path.join(destination_path, album),
@@ -121,12 +133,13 @@ def sync_photos(config, photos):
                 extensions=filters["extensions"],
             )
     else:
-        sync_album(
-            album=photos.all,
-            destination_path=os.path.join(destination_path, "all"),
-            file_sizes=filters["file_sizes"],
-            extensions=filters["extensions"],
-        )
+        for album in iter(filters["albums"]):
+            sync_album(
+                album=photos.albums[album],
+                destination_path=os.path.join(destination_path, album),
+                file_sizes=filters["file_sizes"],
+                extensions=filters["extensions"],
+            )
 
 
 # def enable_debug():
