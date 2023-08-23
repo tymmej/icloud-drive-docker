@@ -4,6 +4,7 @@ import base64
 import os
 import shutil
 import time
+import unicodedata
 from pathlib import Path
 
 from icloudpy import exceptions
@@ -42,6 +43,7 @@ def generate_file_name(photo, file_size, destination_path):
         destination_path,
         f'{"__".join([album_name, name, file_size, base64.urlsafe_b64encode(photo.id.encode()).decode()[2:10]])}.{extension}',
     )
+    file_size_id_album_name_short_path_normalized = unicodedata.normalize('NFC', file_size_id_album_name_short_path)
 
     if os.path.isfile(file_path):
         os.rename(file_path, file_size_id_album_name_short_path)
@@ -51,7 +53,11 @@ def generate_file_name(photo, file_size, destination_path):
         os.rename(file_size_id_path, file_size_id_album_name_short_path)
     if os.path.isfile(file_size_id_album_name_path):
         os.rename(file_size_id_album_name_path, file_size_id_album_name_short_path)
-    return file_size_id_album_name_short_path
+    if os.path.isfile(file_size_id_album_name_short_path):
+        dirpath = os.path.dirname(file_size_id_album_name_short_path_normalized)
+        os.makedirs(dirpath, exist_ok=True)
+        os.rename(file_size_id_album_name_short_path, file_size_id_album_name_short_path_normalized)
+    return file_size_id_album_name_short_path_normalized
 
 
 def photo_exists(photo, file_size, local_path):
@@ -108,7 +114,7 @@ def sync_album(album, destination_path, file_sizes, extensions=None, files=None)
     """Sync given album."""
     if album is None or destination_path is None or file_sizes is None:
         return None
-    os.makedirs(destination_path, exist_ok=True)
+    os.makedirs(unicodedata.normalize('NFC', destination_path), exist_ok=True)
     LOGGER.info(f"Syncing {album.title}")
     for photo in album:
         if photo_wanted(photo, extensions):
