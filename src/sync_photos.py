@@ -11,6 +11,19 @@ from icloudpy import exceptions
 
 from src import LOGGER, config_parser
 
+ignored_albums = [
+    'All Photos',
+    'Time-lapse',
+    'Videos',
+    'Slo-mo',
+    'Bursts',
+    'Favorites',
+    'Panoramas',
+    'Screenshots',
+    'Live',
+    'Recently Deleted',
+    'Hidden',
+]
 
 def photo_wanted(photo, extensions):
     """Check if photo is wanted based on extension."""
@@ -156,6 +169,8 @@ def sync_photos(config, photos):
     download_all = config_parser.get_photos_all_albums(config=config)
     if download_all:
         for album in photos.albums.keys():
+            if album in ignored_albums:
+                continue
             sync_album(
                 album=photos.albums[album],
                 destination_path=os.path.join(destination_path, album),
