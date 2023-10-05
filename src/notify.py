@@ -2,8 +2,9 @@
 import datetime
 import smtplib
 
-from src import LOGGER, config_parser
-from src.email_message import EmailMessage as Message
+from __init__ import LOGGER
+import config_parser
+from email_message import EmailMessage as Message
 
 
 def send(config, last_send=None, dry_run=False):

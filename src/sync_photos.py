@@ -7,9 +7,10 @@ import time
 import unicodedata
 from pathlib import Path
 
-from icloudpy import exceptions
+from pyicloud_ipd import exceptions
 
-from src import LOGGER, config_parser
+from __init__ import LOGGER
+import config_parser
 
 
 def photo_wanted(photo, extensions):
@@ -77,7 +78,7 @@ def download_photo(photo, file_size, destination_path):
             shutil.copyfileobj(download.raw, file_out)
         local_modified_time = time.mktime(photo.added_date.timetuple())
         os.utime(destination_path, (local_modified_time, local_modified_time))
-    except (exceptions.ICloudPyAPIResponseException, FileNotFoundError, Exception) as e:
+    except (exceptions.PyiCloudAPIResponseError, FileNotFoundError, Exception) as e:
         LOGGER.error(f"Failed to download {destination_path}: {str(e)}")
         return False
     return True
@@ -145,10 +146,13 @@ def sync_photos(config, photos):
     filters = config_parser.get_photos_filters(config=config)
     files = set()
     download_all = config_parser.get_photos_all_albums(config=config)
+    library = config_parser.get_photos_library(config=config)
     if download_all:
-        for album in photos.albums.keys():
+        for album in photos.libraries[library].albums.keys():
+            if album in filters["albums"]:
+                continue
             sync_album(
-                album=photos.albums[album],
+                album=photos.libraries[library].albums[album],
                 destination_path=os.path.join(destination_path, album),
                 file_sizes=filters["file_sizes"],
                 extensions=filters["extensions"],
@@ -157,7 +161,7 @@ def sync_photos(config, photos):
     elif filters["albums"]:
         for album in iter(filters["albums"]):
             sync_album(
-                album=photos.albums[album],
+                album=photos.libraries[library].albums[album],
                 destination_path=os.path.join(destination_path, album),
                 file_sizes=filters["file_sizes"],
                 extensions=filters["extensions"],
@@ -165,7 +169,7 @@ def sync_photos(config, photos):
             )
     else:
         sync_album(
-            album=photos.all,
+            album=photos.libraries[library].all,
             destination_path=os.path.join(destination_path, "all"),
             file_sizes=filters["file_sizes"],
             extensions=filters["extensions"],

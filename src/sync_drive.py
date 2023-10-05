@@ -11,10 +11,11 @@ from pathlib import Path
 from shutil import copyfileobj, rmtree
 
 import magic
-from icloudpy import exceptions
+from pyicloud_ipd import exceptions
 from pathspec import PathSpec
 
-from src import LOGGER, config_parser
+from __init__ import LOGGER
+import config_parser
 
 
 def wanted_file(filters, ignore, file_path):
@@ -199,7 +200,7 @@ def download_file(item, local_file):
                 local_file = process_package(local_file=local_file)
         item_modified_time = time.mktime(item.date_modified.timetuple())
         os.utime(local_file, (item_modified_time, item_modified_time))
-    except (exceptions.ICloudPyAPIResponseException, FileNotFoundError, Exception) as e:
+    except (exceptions.PyiCloudAPIResponseError, FileNotFoundError, Exception) as e:
         LOGGER.error(f"Failed to download {local_file}: {str(e)}")
         return False
     return local_file

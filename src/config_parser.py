@@ -3,7 +3,7 @@ __author__ = "Mandar Patil (mandarons@pm.me)"
 
 import os
 
-from src import (
+from __init__ import (
     DEFAULT_DRIVE_DESTINATION,
     DEFAULT_PHOTOS_DESTINATION,
     DEFAULT_RETRY_LOGIN_INTERVAL_SEC,
@@ -104,6 +104,16 @@ def get_photos_all_albums(config):
         download_all = get_config_value(config=config, config_path=config_path)
         LOGGER.info("Syncing all albums.")
     return download_all
+
+
+def get_photos_library(config):
+    """Return libary to download."""
+    library = "PrimarySync"
+    config_path = ["photos", "library"]
+    if traverse_config_path(config=config, config_path=config_path):
+        library = get_config_value(config=config, config_path=config_path)
+        LOGGER.info(f"Syncing {library}.")
+    return library
 
 
 def prepare_root_destination(config):

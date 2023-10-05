@@ -4,20 +4,20 @@ import datetime
 import os
 from time import sleep
 
-from icloudpy import ICloudPyService, exceptions, utils
+from pyicloud_ipd import PyiCloudService, exceptions, utils
 
-from src import (
+from __init__ import (
     DEFAULT_COOKIE_DIRECTORY,
     ENV_ICLOUD_PASSWORD_KEY,
     LOGGER,
-    config_parser,
-    notify,
     read_config,
-    sync_drive,
-    sync_photos,
 )
-from src.usage import alive
+from usage import alive
 
+import config_parser
+import notify
+import sync_drive
+import sync_photos
 
 def get_api_instance(
     username,
@@ -27,7 +27,8 @@ def get_api_instance(
 ):
     """Get API client instance."""
     return (
-        ICloudPyService(
+        PyiCloudService(
+            domain='cn',
             apple_id=username,
             password=password,
             cookie_directory=cookie_directory,
@@ -35,7 +36,8 @@ def get_api_instance(
             setup_endpoint="https://setup.icloud.com.cn/setup/ws/1",
         )
         if server_region == "china"
-        else ICloudPyService(
+        else PyiCloudService(
+            domain='com',
             apple_id=username,
             password=password,
             cookie_directory=cookie_directory,
@@ -96,9 +98,12 @@ def sync():
                     ).strftime("%c")
                     LOGGER.info(f"Retrying login at {next_sync} ...")
                     last_send = notify.send(config, last_send)
-                    sleep(sleep_for)
+                    
+                    print("Code: ")
+                    code = input()
+                    api.validate_verification_code({}, code)
                     continue
-            except exceptions.ICloudPyNoStoredPasswordAvailableException:
+            except exceptions.NoStoredPasswordAvailable:
                 LOGGER.error(
                     "Password is not stored in keyring. Please save the password in keyring."
                 )

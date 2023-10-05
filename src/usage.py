@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import requests
 
-from src.config_parser import prepare_root_destination
+from config_parser import prepare_root_destination
 
 CACHE_FILE_NAME = ".data"
 NEW_INSTALLATION_ENDPOINT = os.environ.get("NEW_INSTALLATION_ENDPOINT", None)
