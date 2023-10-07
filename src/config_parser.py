@@ -365,3 +365,13 @@ def get_photos_library(config):
         library = get_config_value(config=config, config_path=config_path)
         LOGGER.info(f"Syncing {library}.")
     return library
+
+
+def get_folder_format(config):
+    """Return filename format or None."""
+    fmt = None
+    config_path = ["photos", "folder_format"]
+    if traverse_config_path(config=config, config_path=config_path):
+        fmt = get_config_value(config=config, config_path=config_path)
+        LOGGER.info(f"Using format {fmt}.")
+    return fmt
