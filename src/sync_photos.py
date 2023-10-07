@@ -149,11 +149,11 @@ def sync_photos(config, photos):
     download_all = config_parser.get_photos_all_albums(config=config)
     library = config_parser.get_photos_library(config=config)
     if download_all:
-        for album in photos.libraries[library].albums.keys():
+        for album in photos.albums.keys():
             if album in filters["albums"]:
                 continue
             sync_album(
-                album=photos.libraries[library].albums[album],
+                album=photos.albums[album],
                 destination_path=os.path.join(destination_path, album),
                 file_sizes=filters["file_sizes"],
                 extensions=filters["extensions"],
